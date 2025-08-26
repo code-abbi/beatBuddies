@@ -47,7 +47,7 @@ const LandingPage = () => {
                 {/* Header */}
                 <header className='p-4 sm:p-6 flex justify-between items-center sticky top-0 bg-black/50 backdrop-blur-lg z-50'>
                     <div className='flex items-center gap-3'>
-                        <img src='/logo.png' alt='BeatBuddies Logo' className='h-8 w-8 sm:h-10 sm:w-10 object-contain' />
+                        <img src='/spotify.png' alt='BeatBuddies Logo' className='h-8 w-8 sm:h-10 sm:w-10 object-contain' />
                         <h1 className='text-2xl sm:text-3xl font-bold tracking-wider'>
                             Beat<span className='text-emerald-400'>Buddies</span>
                         </h1>

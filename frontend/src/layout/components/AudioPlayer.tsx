@@ -1,12 +1,22 @@
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef,useState } from "react";
+import { useChatStore } from "@/stores/useChatStore";
+import { Slider } from "@/components/ui/slider";
 
 const AudioPlayer = () => {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const prevSongRef = useRef<string | null>(null);
 
 	const { currentSong, isPlaying, playNext } = usePlayerStore();
-
+    const { socket } = useChatStore();
+	useEffect(() => {
+		if (currentSong && socket) {
+			socket.emit("user_activity", {
+				songName: currentSong.title,
+				artistName: currentSong.artist,
+			});
+		}
+	}, [currentSong, socket]);
 	// handle play/pause logic
 	useEffect(() => {
 		if (isPlaying) audioRef.current?.play();
