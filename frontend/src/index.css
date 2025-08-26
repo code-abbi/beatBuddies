@@ -67,3 +67,134 @@
 		@apply bg-background text-foreground;
 	}
 }
+/* Custom Aurora Background Animation */
+@keyframes aurora {
+  from {
+    background-position: 50% 50%, 50% 50%;
+  }
+  to {
+    background-position: 350% 50%, 350% 50%;
+  }
+}
+
+.aurora-background {
+  position: relative;
+  overflow: hidden;
+}
+
+.aurora-background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(
+      ellipse at 20% 40%,
+      rgba(22, 163, 74, 0.15),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 80% 50%,
+      rgba(45, 212, 191, 0.15),
+      transparent 50%
+    );
+  background-size: 1000px 1000px, 1200px 1200px;
+  background-repeat: no-repeat;
+  animation: aurora 20s linear infinite;
+  z-index: 0;
+}
+/* Custom Sliding Background Animation */
+@keyframes slide-in-out {
+  0% {
+    transform: translateY(100%);
+  }
+  50% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.sliding-background::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(22, 163, 74, 0.2), /* Emerald green glow */
+    transparent 60%
+  );
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: slide-in-out 15s ease-in-out infinite;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+/* Styling for the Step Ladder */
+.step-ladder-item {
+  position: relative;
+  padding-left: 3rem; /* Space for number and line */
+  padding-bottom: 2rem;
+  border-left: 2px solid #3f3f46; /* Zinc-700 */
+}
+
+.step-ladder-item:last-child {
+  border-left: 2px solid transparent;
+  padding-bottom: 0;
+}
+
+.step-ladder-number {
+  position: absolute;
+  left: -1.25rem; /* Center the number on the line */
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background-color: #10b981; /* Emerald-500 */
+  color: white;
+  font-weight: bold;
+  border: 4px solid #18181b; /* Zinc-900 */
+}
+/* --- New styles for the dynamic 'How It Works' section --- */
+.dynamic-glow-section {
+  position: relative;
+  overflow: hidden; /* This is important to contain the glow */
+}
+
+/* This is the animated glow element */
+.dynamic-glow-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 200%; /* Make it tall to slide through the whole section */
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(22, 163, 74, 0.3) 50%, /* A softer, more prominent emerald glow */
+    transparent 100%
+  );
+  filter: blur(100px);
+  animation: slide-glow 12s linear infinite;
+  z-index: 0; /* Place it behind the content */
+}
+
+@keyframes slide-glow {
+  from {
+    transform: translateY(-50%);
+  }
+  to {
+    transform: translateY(50%);
+  }
+}
