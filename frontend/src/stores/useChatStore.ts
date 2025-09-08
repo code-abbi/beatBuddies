@@ -22,10 +22,11 @@ interface ChatStore {
 	setSelectedUser: (user: User | null) => void;
 }
 
-const baseURL = import.meta.env.MODE === "development" ? "http://localhost:5000" : "/";
+// THIS IS THE FIX: Pointing the socket connection to the correct backend port.
+const baseURL = "http://localhost:8000";
 
 const socket = io(baseURL, {
-	autoConnect: false, // only connect if user is authenticated
+	autoConnect: false,
 	withCredentials: true,
 });
 
@@ -55,17 +56,27 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 	},
 
 	initSocket: (userId) => {
-		if (!get().isConnected) {
+		if (!get().isConnected && userId) {
+			console.log(`[Socket.IO] Attempting to connect to ${baseURL}`);
 			socket.auth = { userId };
 			socket.connect();
 
-			socket.emit("user_connected", userId);
+			socket.on("connect_error", (err) => {
+                console.error("[Socket.IO] Connection Error:", err.message);
+            });
+
+			socket.on("connect", () => {
+                console.log(`[Socket.IO] Successfully connected with socket ID: ${socket.id}`);
+                set({ isConnected: true });
+            });
 
 			socket.on("users_online", (users: string[]) => {
+				console.log("[Socket.IO] Received online users:", users);
 				set({ onlineUsers: new Set(users) });
 			});
 
 			socket.on("activities", (activities: [string, string][]) => {
+				console.log("[Socket.IO] Received activities:", activities);
 				set({ userActivities: new Map(activities) });
 			});
 
@@ -102,8 +113,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 					return { userActivities: newActivities };
 				});
 			});
-
-			set({ isConnected: true });
 		}
 	},
 

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { UserButton, useUser } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { UploadCloud, Users, MessageSquare, Music4, ArrowRight, Mic2, Star, Target } from "lucide-react";
+import { ArrowRight, Lock, MessageSquare, Radio, LayoutDashboard, Mic2, Star, Target } from "lucide-react";
 
 // --- Reusable Components for a Cleaner Layout ---
 
@@ -12,7 +12,7 @@ const FeatureCard = ({ title, description, icon }: { title: string; description:
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         viewport={{ once: true, amount: 0.3 }}
-        className='bg-white/5 p-6 rounded-xl border border-white/10 text-center flex flex-col items-center'
+        className='bg-white/5 p-8 rounded-2xl border border-white/10 text-center flex flex-col items-center shadow-lg h-full glass-effect'
     >
         <div className='mb-4 p-3 bg-emerald-500/10 rounded-full'>{icon}</div>
         <h3 className='text-xl font-bold mb-2 text-white'>{title}</h3>
@@ -42,7 +42,10 @@ const LandingPage = () => {
     const { isSignedIn, user } = useUser();
 
     return (
-        <div className='bg-black text-white min-h-screen aurora-background'>
+        <div className='bg-black text-white min-h-screen relative overflow-hidden'>
+            {/* This is the new, single sliding background for the entire page */}
+            <div className="hero-gradient-background" />
+
             <div className='relative z-10'>
                 {/* Header */}
                 <header className='p-4 sm:p-6 flex justify-between items-center sticky top-0 bg-black/50 backdrop-blur-lg z-50'>
@@ -60,7 +63,7 @@ const LandingPage = () => {
                             </>
                         ) : (
                             <Link to='/sign-in'>
-                                <Button variant='ghost' className='hover:bg-white/10 hover:text-white'>
+                                <Button variant='ghost' className='text-emerald-500 hover:bg-emerald-500 hover:text-white'>
                                     Sign In
                                 </Button>
                             </Link>
@@ -69,31 +72,62 @@ const LandingPage = () => {
                 </header>
 
                 {/* Hero Section */}
-                <section className='text-center px-6 py-24 sm:py-32'>
+                <section className='text-center px-6 py-28 sm:py-40'>
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7 }}
-                        className='max-w-4xl mx-auto'
+                        className='max-w-5xl mx-auto'
                     >
-                        <h2 className='text-5xl sm:text-7xl font-extrabold mb-6 leading-tight'>
+                        <h2 className='text-5xl sm:text-7xl font-extrabold mb-6 leading-tight bg-gradient-to-r from-white to-violet-400 text-transparent bg-clip-text'>
                             The Feedback Loop for Your Next Hit
                         </h2>
-                        <p className='text-lg sm:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto'>
+                        <p className='text-lg sm:text-xl   mb-12 max-w-3xl mx-auto'>
                             Stop guessing. Start collaborating. BeatBuddies is your private workspace to share new tracks with a trusted circle and perfect your music with real, instant feedback.
                         </p>
                         <Link to={isSignedIn ? "/home" : "/sign-in"}>
-                            <Button size='lg' className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg px-8 py-6 shadow-lg transform hover:scale-105 transition-transform duration-200 rounded-full'>
-                                {isSignedIn ? "Enter the Studio" : "Start for Free"} <ArrowRight className='ml-2' />
+                            <Button size='lg' className='bg-emerald-600 hover:bg-violet-700 text-white font-bold text-lg px-10 py-7 shadow-lg transform hover:scale-105 transition-transform duration-200 rounded-full'>
+                                {isSignedIn ? "Enter the Studio" : "Start Now"} 
                             </Button>
                         </Link>
                     </motion.div>
                 </section>
+                
+                {/* Key Features Section - MORE INFO ADDED */}
+                <section className='px-6 py-24 sm:py-32 bg-black/40 glass-effect'>
+                    <div className='max-w-7xl mx-auto'>
+                        <h2 className='text-4xl sm:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-white to-violet-400 text-transparent bg-clip-text'>
+                            An All-in-One Studio for Collaboration
+                        </h2>
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
+                            <FeatureCard
+                                title='Real-Time Chat'
+                                description='Get instant, time-stamped feedback on your tracks in a dedicated chat room for each project.'
+                                icon={<MessageSquare className='text-violet-400'size={28} />}
+                            />
+                            <FeatureCard
+                                title='Secure Uploads'
+                                description='Your work is private. Upload audio and cover art securely, hosted on Cloudinary.'
+                                icon={<Lock className='text-violet-400'size={28} />}
+                            />
+                            <FeatureCard
+                                title='Live Activity Feed'
+                                description='See what your trusted circle is listening to in real-time, fostering a connected and collaborative environment.'
+                                icon={<Radio className='text-violet-400'size={28} />}
+                            />
+                            <FeatureCard
+                                title='Admin Dashboard'
+                                description='A dedicated panel to manage all user-uploaded content and view key application statistics.'
+                                icon={<LayoutDashboard className='text-violet-400'size={28} />}
+                            />
+                        </div>
+                    </div>
+                </section>
 
-                {/* "How It Works" Section with Dynamic Glow */}
-                <section className='dynamic-glow-section px-6 py-20 sm:py-28'>
+                {/* "How It Works" Section */}
+                <section className='px-6 py-20 sm:py-28 bg-black/30 backdrop-blur-sm'>
                     <div className='max-w-3xl mx-auto relative z-10'>
-                        <h2 className='text-3xl sm:text-4xl font-bold text-center mb-16'>
+                        <h2 className='text-3xl sm:text-4xl font-bold text-center mb-16 bg-gradient-to-r from-white to-violet-400 text-transparent bg-clip-text'>
                             Refine Your Sound in 3 Simple Steps
                         </h2>
                         <div>
@@ -103,35 +137,58 @@ const LandingPage = () => {
                         </div>
                     </div>
                 </section>
-
-                {/* New "Who It's For" Section */}
-                <section className='px-6 py-20'>
+                
+                {/* "Who It's For" Section */}
+                <section className='px-6 py-20 bg-black/30 backdrop-blur-sm'>
                     <div className='max-w-6xl mx-auto'>
-                        <h2 className='text-3xl sm:text-4xl font-bold text-center mb-12'>
+                        <h2 className='text-3xl sm:text-4xl font-bold text-center mb-12 bg-gradient-to-r from-white to-violet-400 text-transparent bg-clip-text'>
                             A Playground for Every Creator
                         </h2>
                         <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
                             <FeatureCard
                                 title='Music Producers'
                                 description='Get feedback on your latest beat, check your mixdowns, or see if your new sample hits the mark before sending it to artists.'
-                                icon={<Mic2 className='text-emerald-400' size={28} />}
+                                icon={<Mic2 className='text-violet-400' size={28} />}
                             />
                             <FeatureCard
                                 title='Vocalists & Songwriters'
                                 description='Share a raw vocal take or a new lyrical idea with your bandmates or producer to get their instant thoughts.'
-                                icon={<Star className='text-emerald-400' size={28} />}
+                                icon={<Star className='text-violet-400' size={28} />}
                             />
                             <FeatureCard
                                 title='A&Rs and Managers'
                                 description='Create a private feedback hub for your roster of artists to streamline the demo review process.'
-                                icon={<Target className='text-emerald-400' size={28} />}
+                                icon={<Target className='text-violet-400' size={28} />}
                             />
                         </div>
                     </div>
                 </section>
+                
+                {/* Final CTA Section - ADDED FOR MORE CONTENT */}
+                <section className='text-center px-6 py-28 sm:py-40 bg-black/40 glass-effect'>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.6 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        className='max-w-4xl mx-auto'
+                    >
+                        <h2 className='text-5xl sm:text-6xl font-extrabold mb-6 leading-tight bg-gradient-to-r from-white to-violet-400 text-transparent bg-clip-text'>
+                            Ready to Perfect Your Sound?
+                        </h2>
+                        <p className='text-lg sm:text-xl text-zinc-300 mb-12 max-w-2xl mx-auto bg-gradient-to-r from-white to-violet-400 text-transparent bg-clip-text'>
+                            Join a community of creators and start getting the feedback you need to finish your next masterpiece.
+                        </p>
+                        <Link to={isSignedIn ? "/home" : "/sign-in"}>
+                            <Button size='lg' className='bg-emerald-600 hover:bg-violet-700 text-white font-bold text-lg px-10 py-7 shadow-lg transform hover:scale-105 transition-transform duration-200 rounded-full'>
+                                {isSignedIn ? "Back to the Studio" : "Get Started Now"} <ArrowRight className='ml-2' />
+                            </Button>
+                        </Link>
+                    </motion.div>
+                </section>
 
                 {/* Footer */}
-                <footer className='p-6 text-center text-zinc-600 text-sm mt-20 border-t border-white/10'>
+                <footer className='p-6 text-center text-zinc-600 text-sm mt-20 border-t border-white/10 bg-black/30 backdrop-blur-sm'>
                     <p>&copy; {new Date().getFullYear()} BeatBuddies. Designed for creators, by creators.</p>
                 </footer>
             </div>

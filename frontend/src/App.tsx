@@ -7,17 +7,17 @@ import ChatPage from "./pages/chat/ChatPage";
 import AlbumPage from "./pages/album/AlbumPage";
 import AdminPage from "./pages/admin/AdminPage";
 import SignInPage from "./pages/sign-in/SignInPage";
-import LandingPage from "./pages/landing/LandingPage"; // Import the new landing page
-
+import LandingPage from "./pages/landing/LandingPage";
 import { Toaster } from "react-hot-toast";
 import NotFoundPage from "./pages/404/NotFoundPage";
 
 function App() {
     return (
         <>
+            <Toaster />
             <Routes>
                 {/* Public routes that anyone can access */}
-                <Route path='/' element={<LandingPage />} /> {/* This is the new root page */}
+                <Route path='/' element={<LandingPage />} />
                 <Route path='/sign-in' element={<SignInPage />} />
                 <Route
                     path='/sso-callback'
@@ -25,32 +25,40 @@ function App() {
                 />
                 <Route path='/auth-callback' element={<AuthCallbackPage />} />
 
-                {/* Protected routes that only signed-in users can access */}
+                {/* Protected Routes */}
                 <Route
-                    path='/*'
                     element={
-                        <>
-                            <SignedIn>
-                                <Routes>
-                                    {/* The main app now lives under /home */}
-                                    <Route path='/home' element={<MainLayout />}>
-                                        <Route index element={<HomePage />} />
-                                        <Route path='chat' element={<ChatPage />} />
-                                        <Route path='albums/:albumId' element={<AlbumPage />} />
-                                    </Route>
-                                    <Route path='/admin' element={<AdminPage />} />
-                                    <Route path='*' element={<NotFoundPage />} />
-                                </Routes>
-                            </SignedIn>
-                            <SignedOut>
-                                {/* If a logged-out user tries to access a protected page, send them to sign in */}
-                                <RedirectToSignIn />
-                            </SignedOut>
-                        </>
+                        <SignedIn>
+                            <MainLayout />
+                        </SignedIn>
+                    }
+                >
+                    <Route path='/home' element={<HomePage />} />
+                    <Route path='/chat' element={<ChatPage />} />
+                    <Route path='/albums/:albumId' element={<AlbumPage />} />
+                </Route>
+
+                <Route
+                    path='/admin'
+                    element={
+                        <SignedIn>
+                            <AdminPage />
+                        </SignedIn>
                     }
                 />
+
+                {/* Fallback for any other routes */}
+                <Route path='*' element={
+                    <>
+                        <SignedIn>
+                            <NotFoundPage />
+                        </SignedIn>
+                        <SignedOut>
+                            <RedirectToSignIn />
+                        </SignedOut>
+                    </>
+                } />
             </Routes>
-            <Toaster />
         </>
     );
 }

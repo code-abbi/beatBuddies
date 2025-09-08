@@ -24,11 +24,11 @@ const LeftSidebar = () => {
 			<div className='rounded-lg bg-zinc-900 p-4'>
 				<div className='space-y-2'>
 					<Link
-						to={"/"}
+						to={"/home"}
 						className={cn(
 							buttonVariants({
 								variant: "ghost",
-								className: "w-full justify-start text-white hover:bg-zinc-800",
+								className: "w-full justify-start text-emerald-500 hover:text-violet-500 transition-colors",
 							})
 						)}
 					>
@@ -42,7 +42,7 @@ const LeftSidebar = () => {
 							className={cn(
 								buttonVariants({
 									variant: "ghost",
-									className: "w-full justify-start text-white hover:bg-zinc-800",
+									className: "w-full justify-start text-emerald-500 hover:text-violet-500  transition-colors",
 								})
 							)}
 						>

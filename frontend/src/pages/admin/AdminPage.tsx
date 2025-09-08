@@ -10,14 +10,16 @@ import { useMusicStore } from "@/stores/useMusicStore";
 
 const AdminPage = () => {
 	const { isAdmin, isLoading } = useAuthStore();
-
 	const { fetchAlbums, fetchSongs, fetchStats } = useMusicStore();
 
 	useEffect(() => {
-		fetchAlbums();
-		fetchSongs();
-		fetchStats();
-	}, [fetchAlbums, fetchSongs, fetchStats]);
+		// Only fetch data if the user is confirmed to be an admin.
+		if (isAdmin) {
+			fetchAlbums();
+			fetchSongs();
+			fetchStats();
+		}
+	}, [isAdmin, fetchAlbums, fetchSongs, fetchStats]);
 
 	if (!isAdmin && !isLoading) return <div>Unauthorized</div>;
 

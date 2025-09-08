@@ -4,30 +4,40 @@ import { Message } from "../models/message.model.js";
 export const initializeSocket = (server) => {
 	const io = new Server(server, {
 		cors: {
-			origin: ["http://localhost:3000", "http://localhost:5173"], // This allows both ports
+			origin: "http://localhost:3000",
 			credentials: true,
 			methods: ["GET", "POST"],
 		},
 	});
 
-	const userSockets = new Map(); // { userId: socketId}
-	const userActivities = new Map(); // {userId: activity}
+	const userSockets = new Map(); // { userId: socketId }
+	const userActivities = new Map(); // { userId: activity }
 
 	io.on("connection", (socket) => {
-		socket.on("user_connected", (userId) => {
-			userSockets.set(userId, socket.id);
-			userActivities.set(userId, "Idle");
+		// Get userId from the auth object sent by the client
+		const userId = socket.handshake.auth.userId;
 
-			// broadcast to all connected sockets that this user just logged in
-			io.emit("user_connected", userId);
+		// If a user connects without a userId, disconnect them.
+		if (!userId) {
+			return socket.disconnect();
+		}
 
-			socket.emit("users_online", Array.from(userSockets.keys()));
+		// -- THIS IS THE CORRECTED LOGIC --
+		// Immediately register the user and their socket ID upon connection.
+		userSockets.set(userId, socket.id);
+		userActivities.set(userId, "Idle");
 
-			io.emit("activities", Array.from(userActivities.entries()));
-		});
+		// Notify all other users that this user has come online.
+		socket.broadcast.emit("user_connected", userId);
 
+		// Send the full list of online users ONLY to the user who just connected.
+		socket.emit("users_online", Array.from(userSockets.keys()));
+
+		// Send the full list of all activities ONLY to the user who just connected.
+		socket.emit("activities", Array.from(userActivities.entries()));
+
+		// -- THE REST OF THE EVENT LISTENERS --
 		socket.on("update_activity", ({ userId, activity }) => {
-			console.log("activity updated", userId, activity);
 			userActivities.set(userId, activity);
 			io.emit("activity_updated", { userId, activity });
 		});
@@ -35,39 +45,22 @@ export const initializeSocket = (server) => {
 		socket.on("send_message", async (data) => {
 			try {
 				const { senderId, receiverId, content } = data;
-
-				const message = await Message.create({
-					senderId,
-					receiverId,
-					content,
-				});
-
-				// send to receiver in realtime, if they're online
+				const message = await Message.create({ senderId, receiverId, content });
 				const receiverSocketId = userSockets.get(receiverId);
 				if (receiverSocketId) {
 					io.to(receiverSocketId).emit("receive_message", message);
 				}
-
 				socket.emit("message_sent", message);
 			} catch (error) {
-				console.error("Message error:", error);
 				socket.emit("message_error", error.message);
 			}
 		});
 
 		socket.on("disconnect", () => {
-			let disconnectedUserId;
-			for (const [userId, socketId] of userSockets.entries()) {
-				// find disconnected user
-				if (socketId === socket.id) {
-					disconnectedUserId = userId;
-					userSockets.delete(userId);
-					userActivities.delete(userId);
-					break;
-				}
-			}
-			if (disconnectedUserId) {
-				io.emit("user_disconnected", disconnectedUserId);
+			if (userSockets.has(userId)) {
+				userSockets.delete(userId);
+				userActivities.delete(userId);
+				io.emit("user_disconnected", userId);
 			}
 		});
 	});

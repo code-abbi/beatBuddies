@@ -67,80 +67,11 @@
 		@apply bg-background text-foreground;
 	}
 }
-/* Custom Aurora Background Animation */
-@keyframes aurora {
-  from {
-    background-position: 50% 50%, 50% 50%;
-  }
-  to {
-    background-position: 350% 50%, 350% 50%;
-  }
-}
-
-.aurora-background {
-  position: relative;
-  overflow: hidden;
-}
-
-.aurora-background::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    radial-gradient(
-      ellipse at 20% 40%,
-      rgba(22, 163, 74, 0.15),
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 80% 50%,
-      rgba(45, 212, 191, 0.15),
-      transparent 50%
-    );
-  background-size: 1000px 1000px, 1200px 1200px;
-  background-repeat: no-repeat;
-  animation: aurora 20s linear infinite;
-  z-index: 0;
-}
-/* Custom Sliding Background Animation */
-@keyframes slide-in-out {
-  0% {
-    transform: translateY(100%);
-  }
-  50% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(100%);
-  }
-}
-
-.sliding-background::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 10%;
-  width: 80%;
-  height: 80%;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(22, 163, 74, 0.2), /* Emerald green glow */
-    transparent 60%
-  );
-  border-radius: 50%;
-  filter: blur(60px);
-  animation: slide-in-out 15s ease-in-out infinite;
-  z-index: 0;
-  opacity: 0.5;
-}
 
 /* Styling for the Step Ladder */
 .step-ladder-item {
   position: relative;
-  padding-left: 3rem; /* Space for number and line */
+  padding-left: 3rem;
   padding-bottom: 2rem;
   border-left: 2px solid #3f3f46; /* Zinc-700 */
 }
@@ -152,7 +83,7 @@
 
 .step-ladder-number {
   position: absolute;
-  left: -1.25rem; /* Center the number on the line */
+  left: -1.25rem;
   top: 0;
   display: flex;
   align-items: center;
@@ -165,36 +96,44 @@
   font-weight: bold;
   border: 4px solid #18181b; /* Zinc-900 */
 }
-/* --- New styles for the dynamic 'How It Works' section --- */
-.dynamic-glow-section {
-  position: relative;
-  overflow: hidden; /* This is important to contain the glow */
+
+/* New, single animated background that never disappears */
+.hero-gradient-background {
+    --gradient-color-1: rgba(16, 185, 129, 0.3);  /* emerald-500 */
+    --gradient-color-2: rgba(52, 211, 153, 0.2); /* emerald-400 */
+    --gradient-color-3: rgba(16, 185, 129, 0.25); /* emerald-500 */
+    --gradient-color-4: rgba(5, 150, 105, 0.3);  /* emerald-600 */
+    
+    background:
+      radial-gradient(at 10% 20%, var(--gradient-color-1) 0px, transparent 50%),
+      radial-gradient(at 80% 10%, var(--gradient-color-2) 0px, transparent 50%),
+      radial-gradient(at 20% 90%, var(--gradient-color-3) 0px, transparent 50%),
+      radial-gradient(at 90% 80%, var(--gradient-color-4) 0px, transparent 50%);
+    
+    position: fixed; /* This is the fix: changed from absolute to fixed */
+    inset: 0;
+    z-index: 0;
+    background-size: 200% 200%;
+    animation: background-pan 2s linear infinite;
 }
 
-/* This is the animated glow element */
-.dynamic-glow-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 200%; /* Make it tall to slide through the whole section */
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(22, 163, 74, 0.3) 50%, /* A softer, more prominent emerald glow */
-    transparent 100%
-  );
-  filter: blur(100px);
-  animation: slide-glow 12s linear infinite;
-  z-index: 0; /* Place it behind the content */
+@keyframes background-pan {
+    0% {
+        background-position: 100% 50%;
+    }
+    50% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
 }
 
-@keyframes slide-glow {
-  from {
-    transform: translateY(-50%);
-  }
-  to {
-    transform: translateY(50%);
-  }
+/* Glass Effect Styling */
+.glass-effect {
+  background-color: rgba(12, 12, 12, 0.3); /* Dark glass base */
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%); /* Safari compatibility */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }

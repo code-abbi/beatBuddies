@@ -18,11 +18,19 @@ const formatTime = (date: string) => {
 
 const ChatPage = () => {
 	const { user } = useUser();
-	const { messages, selectedUser, fetchUsers, fetchMessages } = useChatStore();
+	const { messages, selectedUser, fetchUsers, fetchMessages, initSocket, disconnectSocket } = useChatStore();
 
+	// Connect socket when user logs in
 	useEffect(() => {
-		if (user) fetchUsers();
-	}, [fetchUsers, user]);
+		if (user) {
+			initSocket(user.id);
+			fetchUsers();
+		}
+		// Disconnect on unmount
+		return () => {
+			disconnectSocket && disconnectSocket();
+		};
+	}, [user, initSocket, fetchUsers, disconnectSocket]);
 
 	useEffect(() => {
 		if (selectedUser) fetchMessages(selectedUser.clerkId);
