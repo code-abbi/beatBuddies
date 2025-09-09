@@ -32,7 +32,7 @@ initializeSocket(httpServer);
 // Apply CORS middleware for all HTTP requests
 app.use(
 	cors({
-		origin: "http://localhost:3000",
+		origin: process.env.FRONTEND_URL,
 		credentials: true,
 	})
 );

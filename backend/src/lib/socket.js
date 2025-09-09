@@ -4,7 +4,7 @@ import { Message } from "../models/message.model.js";
 export const initializeSocket = (server) => {
 	const io = new Server(server, {
 		cors: {
-			origin: "http://localhost:3000",
+			origin: process.env.FRONTEND_URL, 
 			credentials: true,
 			methods: ["GET", "POST"],
 		},
@@ -13,30 +13,25 @@ export const initializeSocket = (server) => {
 	const userSockets = new Map(); // { userId: socketId }
 	const userActivities = new Map(); // { userId: activity }
 
+	// This function broadcasts the complete, correct state to EVERYONE.
+	const broadcastFullState = () => {
+		io.emit("users_online", Array.from(userSockets.keys()));
+		io.emit("activities", Array.from(userActivities.entries()));
+	};
+
 	io.on("connection", (socket) => {
-		// Get userId from the auth object sent by the client
+		// KEEPING your original, correct method of getting the user ID
 		const userId = socket.handshake.auth.userId;
 
-		// If a user connects without a userId, disconnect them.
 		if (!userId) {
 			return socket.disconnect();
 		}
 
-		// -- THIS IS THE CORRECTED LOGIC --
-		// Immediately register the user and their socket ID upon connection.
+		// When a user connects, add them and broadcast the new full state
 		userSockets.set(userId, socket.id);
 		userActivities.set(userId, "Idle");
+		broadcastFullState(); // This is the fix.
 
-		// Notify all other users that this user has come online.
-		socket.broadcast.emit("user_connected", userId);
-
-		// Send the full list of online users ONLY to the user who just connected.
-		socket.emit("users_online", Array.from(userSockets.keys()));
-
-		// Send the full list of all activities ONLY to the user who just connected.
-		socket.emit("activities", Array.from(userActivities.entries()));
-
-		// -- THE REST OF THE EVENT LISTENERS --
 		socket.on("update_activity", ({ userId, activity }) => {
 			userActivities.set(userId, activity);
 			io.emit("activity_updated", { userId, activity });
@@ -47,6 +42,7 @@ export const initializeSocket = (server) => {
 				const { senderId, receiverId, content } = data;
 				const message = await Message.create({ senderId, receiverId, content });
 				const receiverSocketId = userSockets.get(receiverId);
+
 				if (receiverSocketId) {
 					io.to(receiverSocketId).emit("receive_message", message);
 				}
@@ -60,7 +56,8 @@ export const initializeSocket = (server) => {
 			if (userSockets.has(userId)) {
 				userSockets.delete(userId);
 				userActivities.delete(userId);
-				io.emit("user_disconnected", userId);
+				// When a user disconnects, broadcast the new state again
+				broadcastFullState(); // This is the fix.
 			}
 		});
 	});

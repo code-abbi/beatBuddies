@@ -9,14 +9,7 @@ const AudioPlayer = () => {
 
 	const { currentSong, isPlaying, playNext } = usePlayerStore();
     const { socket } = useChatStore();
-	useEffect(() => {
-		if (currentSong && socket) {
-			socket.emit("user_activity", {
-				songName: currentSong.title,
-				artistName: currentSong.artist,
-			});
-		}
-	}, [currentSong, socket]);
+	
 	// handle play/pause logic
 	useEffect(() => {
 		if (isPlaying) audioRef.current?.play();
