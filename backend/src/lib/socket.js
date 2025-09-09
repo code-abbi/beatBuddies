@@ -4,30 +4,33 @@ import { Message } from "../models/message.model.js";
 export const initializeSocket = (server) => {
 	const io = new Server(server, {
 		cors: {
-			origin: process.env.FRONTEND_URL,
+			origin: "http://localhost:3000",
 			credentials: true,
 			methods: ["GET", "POST"],
 		},
 	});
 
-	const userSockets = new Map();
-	const userActivities = new Map();
+	const userSockets = new Map(); // { userId: socketId }
+	const userActivities = new Map(); // { userId: activity }
 
+	// This function broadcasts the complete, correct state to EVERYONE.
 	const broadcastFullState = () => {
 		io.emit("users_online", Array.from(userSockets.keys()));
 		io.emit("activities", Array.from(userActivities.entries()));
 	};
 
 	io.on("connection", (socket) => {
+		// KEEPING your original, correct method of getting the user ID
 		const userId = socket.handshake.auth.userId;
 
 		if (!userId) {
 			return socket.disconnect();
 		}
 
+		// When a user connects, add them and broadcast the new full state
 		userSockets.set(userId, socket.id);
 		userActivities.set(userId, "Idle");
-		broadcastFullState();
+		broadcastFullState(); // This is the fix.
 
 		socket.on("update_activity", ({ userId, activity }) => {
 			userActivities.set(userId, activity);
@@ -53,7 +56,8 @@ export const initializeSocket = (server) => {
 			if (userSockets.has(userId)) {
 				userSockets.delete(userId);
 				userActivities.delete(userId);
-				broadcastFullState();
+				// When a user disconnects, broadcast the new state again
+				broadcastFullState(); // This is the fix.
 			}
 		});
 	});
