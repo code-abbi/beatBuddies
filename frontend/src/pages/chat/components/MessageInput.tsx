@@ -19,17 +19,18 @@ const MessageInput = () => {
 	};
 
 	return (
-		<div className='p-4 mt-auto border-t border-zinc-800'>
+		<div className='p-4 mt-auto border-t border-border'>
 			<div className='flex gap-2'>
 				<Input
 					placeholder='Type a message'
 					value={newMessage}
 					onChange={(e) => setNewMessage(e.target.value)}
-					className='bg-zinc-800 border-none'
+					className='bg-muted border-border focus-visible:ring-primary'
 					onKeyDown={(e) => e.key === "Enter" && handleSend()}
 				/>
 
-				<Button size={"icon"} onClick={handleSend} disabled={!newMessage.trim()}>
+				<Button size={"icon"} onClick={handleSend} disabled={!newMessage.trim()}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground">
 					<Send className='size-4' />
 				</Button>
 			</div>

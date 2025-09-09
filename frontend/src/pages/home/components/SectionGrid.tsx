@@ -14,17 +14,18 @@ const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
 	return (
 		<div className='mb-8'>
 			<div className='flex items-center justify-between mb-4'>
-				<h2 className='text-xl sm:text-2xl font-bold'>{title}</h2>
-				<Button variant='link' className='text-sm text-zinc-400 hover:text-white'>
+				<h2 className='text-xl sm:text-2xl font-bold text-foreground'>{title}</h2>
+				<Button variant='link' className='text-sm text-muted-foreground hover:text-primary'>
 					Show all
 				</Button>
 			</div>
 
-			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
+			<div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'>
 				{songs.map((song) => (
 					<div
 						key={song._id}
-						className='bg-zinc-800/40 p-4 rounded-md hover:bg-zinc-700/40 transition-all group cursor-pointer'
+						className='bg-card/50 p-4 rounded-lg hover:bg-card/80 transition-all duration-300 group cursor-pointer
+                           border border-border shadow-lg glass-effect'
 					>
 						<div className='relative mb-4'>
 							<div className='aspect-square rounded-md shadow-lg overflow-hidden'>
@@ -32,13 +33,13 @@ const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
 									src={song.imageUrl}
 									alt={song.title}
 									className='w-full h-full object-cover transition-transform duration-300 
-									group-hover:scale-105'
+									group-hover:scale-110'
 								/>
 							</div>
 							<PlayButton song={song} />
 						</div>
-						<h3 className='font-medium mb-2 truncate'>{song.title}</h3>
-						<p className='text-sm text-zinc-400 truncate'>{song.artist}</p>
+						<h3 className='font-semibold mb-1 truncate text-foreground'>{song.title}</h3>
+						<p className='text-sm text-muted-foreground truncate'>{song.artist}</p>
 					</div>
 				))}
 			</div>

@@ -4,6 +4,7 @@ import LeftSidebar from "./components/LeftSidebar";
 import FriendsActivity from "./components/FriendsActivity";
 import AudioPlayer from "./components/AudioPlayer";
 import { PlaybackControls } from "./components/PlaybackControls";
+import Topbar from "@/components/Topbar";
 import { useEffect, useState } from "react";
 
 const MainLayout = () => {
@@ -20,33 +21,39 @@ const MainLayout = () => {
 	}, []);
 
 	return (
-		<div className='h-screen bg-black text-white flex flex-col'>
-			<ResizablePanelGroup direction='horizontal' className='flex-1 flex h-full overflow-hidden p-2'>
-				<AudioPlayer />
-				{/* left sidebar */}
-				<ResizablePanel defaultSize={20} minSize={isMobile ? 0 : 10} maxSize={30}>
-					<LeftSidebar />
-				</ResizablePanel>
+		<div className='h-screen bg-background text-foreground flex flex-col'>
+			<AudioPlayer />
+			<div className="flex-1 flex flex-col min-h-0">
+				<Topbar />
+				<ResizablePanelGroup direction='horizontal' className='flex-1 p-2 gap-2'>
+					{/* Left sidebar */}
+					<ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="min-h-0">
+						<div className="h-full min-h-0">
+							<LeftSidebar />
+						</div>
+					</ResizablePanel>
+					<ResizableHandle withHandle />
 
-				<ResizableHandle className='w-2 bg-black rounded-lg transition-colors' />
+					{/* Main content */}
+					<ResizablePanel defaultSize={60} className="rounded-lg overflow-hidden min-h-0">
+						<div className="h-full min-h-0">
+							<Outlet />
+						</div>
+					</ResizablePanel>
 
-				{/* Main content */}
-				<ResizablePanel defaultSize={isMobile ? 80 : 60}>
-					<Outlet />
-				</ResizablePanel>
-
-				{!isMobile && (
-					<>
-						<ResizableHandle className='w-2 bg-black rounded-lg transition-colors' />
-
-						{/* right sidebar */}
-						<ResizablePanel defaultSize={20} minSize={0} maxSize={25} collapsedSize={0}>
-							<FriendsActivity />
-						</ResizablePanel>
-					</>
-				)}
-			</ResizablePanelGroup>
-
+					{/* right sidebar */}
+					{!isMobile && (
+						<>
+							<ResizableHandle withHandle />
+							<ResizablePanel defaultSize={20} minSize={15} maxSize={25} className="min-h-0">
+								<div className="h-full min-h-0">
+									<FriendsActivity />
+								</div>
+							</ResizablePanel>
+						</>
+					)}
+				</ResizablePanelGroup>
+			</div>
 			<PlaybackControls />
 		</div>
 	);

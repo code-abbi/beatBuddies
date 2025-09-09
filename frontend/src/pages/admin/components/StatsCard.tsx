@@ -1,28 +1,32 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LucideIcon } from "lucide-react";
+import { motion } from "framer-motion";
 
 type StatsCardProps = {
-	icon: React.ElementType;
+	icon: LucideIcon;
 	label: string;
 	value: string;
-	bgColor: string;
-	iconColor: string;
+    color: string;
 };
 
-const StatsCard = ({ bgColor, icon: Icon, iconColor, label, value }: StatsCardProps) => {
+const StatsCard = ({ icon: Icon, label, value, color }: StatsCardProps) => {
 	return (
-		<Card className='bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800/80 transition-colors'>
-			<CardContent className='p-6'>
-				<div className='flex items-center gap-4'>
-					<div className={`p-3 rounded-lg ${bgColor}`}>
-						<Icon className={`size-6 ${iconColor}`} />
-					</div>
-					<div>
-						<p className='text-sm text-zinc-400'>{label}</p>
-						<p className='text-2xl font-bold'>{value}</p>
-					</div>
-				</div>
-			</CardContent>
-		</Card>
+		<motion.div
+			initial={{ opacity: 0, y: 20 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ duration: 0.5 }}
+			className={`bg-gradient-to-br ${color} rounded-xl p-0.5 shadow-2xl hover:shadow-lg transition-shadow duration-300`}
+		>
+			<Card className='h-full bg-card/90 border-none backdrop-blur-sm'>
+                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+					<CardTitle className='text-sm font-medium text-muted-foreground'>{label}</CardTitle>
+					<Icon className={`h-5 w-5 text-muted-foreground`} />
+				</CardHeader>
+				<CardContent>
+					<div className='text-3xl font-bold text-foreground'>{value}</div>
+				</CardContent>
+			</Card>
+		</motion.div>
 	);
 };
 export default StatsCard;

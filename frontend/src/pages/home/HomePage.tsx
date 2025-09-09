@@ -1,4 +1,3 @@
-import Topbar from "@/components/Topbar";
 import { useMusicStore } from "@/stores/useMusicStore";
 import { useEffect } from "react";
 import FeaturedSection from "./components/FeaturedSection";
@@ -32,21 +31,38 @@ const HomePage = () => {
 		}
 	}, [initializeQueue, madeForYouSongs, trendingSongs, featuredSongs]);
 
-	return (
-		<main className='rounded-md overflow-hidden h-full bg-gradient-to-b from-zinc-800 to-zinc-900'>
-			<Topbar />
-			<ScrollArea className='h-[calc(100vh-180px)]'>
-				<div className='p-4 sm:p-6'>
-					<h1 className='text-2xl sm:text-3xl font-bold mb-6'>Good afternoon</h1>
-					<FeaturedSection />
+    const getGreeting = () => {
+        const currentHour = new Date().getHours();
+        if (currentHour >= 5 && currentHour < 12) {
+            return "Good morning";
+        } else if (currentHour >= 12 && currentHour < 17) {
+            return "Good afternoon";
+        } else if (currentHour >= 17 && currentHour < 22) {
+            return "Good evening";
+        } else {
+            return "Good night";
+        }
+    };
 
-					<div className='space-y-8'>
-						<SectionGrid title='Made For You' songs={madeForYouSongs} isLoading={isLoading} />
-						<SectionGrid title='Trending' songs={trendingSongs} isLoading={isLoading} />
+	return (
+		<div className='h-full bg-background relative'>
+			<div className='absolute inset-0 dynamic-gradient-background z-0' />
+			<div className='relative z-10 h-full'>
+				<ScrollArea className='h-full scroll-area-thin'>
+					<div className='p-4 sm:p-6'>
+						<h1 className='text-3xl sm:text-4xl font-extrabold mb-8 bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text'>
+							{getGreeting()}
+						</h1>
+						<FeaturedSection />
+
+						<div className='space-y-10 mt-12'>
+							<SectionGrid title='Made For You' songs={madeForYouSongs} isLoading={isLoading} />
+							<SectionGrid title='Trending' songs={trendingSongs} isLoading={isLoading} />
+						</div>
 					</div>
-				</div>
-			</ScrollArea>
-		</main>
+				</ScrollArea>
+			</div>
+		</div>
 	);
 };
 export default HomePage;

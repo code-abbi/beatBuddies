@@ -24,38 +24,34 @@
 		--input: 240 5.9% 90%;
 		--ring: 142.1 76.2% 36.3%;
 		--radius: 0.5rem;
-		--chart-1: 12 76% 61%;
-		--chart-2: 173 58% 39%;
-		--chart-3: 197 37% 24%;
-		--chart-4: 43 74% 66%;
-		--chart-5: 27 87% 67%;
 	}
 
 	.dark {
-		--background: 20 14.3% 4.1%;
-		--foreground: 0 0% 95%;
-		--card: 24 9.8% 10%;
-		--card-foreground: 0 0% 95%;
-		--popover: 0 0% 9%;
-		--popover-foreground: 0 0% 95%;
-		--primary: 142.1 70.6% 45.3%;
-		--primary-foreground: 144.9 80.4% 10%;
-		--secondary: 240 3.7% 15.9%;
-		--secondary-foreground: 0 0% 98%;
-		--muted: 0 0% 15%;
-		--muted-foreground: 240 5% 64.9%;
-		--accent: 12 6.5% 15.1%;
-		--accent-foreground: 0 0% 98%;
-		--destructive: 0 62.8% 30.6%;
-		--destructive-foreground: 0 85.7% 97.3%;
-		--border: 240 3.7% 15.9%;
-		--input: 240 3.7% 15.9%;
-		--ring: 142.4 71.8% 29.2%;
-		--chart-1: 220 70% 50%;
-		--chart-2: 160 60% 45%;
-		--chart-3: 30 80% 55%;
-		--chart-4: 280 65% 60%;
-		--chart-5: 340 75% 55%;
+        --background: 224 71% 4%; /* A very dark, deep blue */
+        --foreground: 210 40% 98%;
+        --card: 224 71% 9%;
+        --card-foreground: 210 40% 98%;
+        --popover: 224 71% 4%;
+        --popover-foreground: 210 40% 98%;
+
+        --primary: 262.1 83.3% 57.8%; /* Vibrant Violet */
+        --primary-foreground: 210 40% 98%;
+        
+        --secondary: 326.3 100% 50%; /* Hot Pink */
+        --secondary-foreground: 210 40% 98%;
+
+        --muted: 224 71% 14%;
+        --muted-foreground: 215 20.2% 65.1%;
+        
+        --accent: 262.1 83.3% 57.8%;
+        --accent-foreground: 210 40% 98%;
+
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 210 40% 98%;
+        --border: 217.2 32.6% 17.5%;
+        --input: 217.2 32.6% 17.5%;
+        --ring: 262.1 83.3% 57.8%;
+        --radius: 0.75rem;
 	}
 }
 
@@ -68,16 +64,53 @@
 	}
 }
 
-/* Styling for the Step Ladder */
+/* New, single animated background that never disappears */
+.hero-gradient-background {
+    --gradient-color-1: rgba(124, 58, 237, 0.3);  /* primary (violet) */
+    --gradient-color-2: rgba(236, 72, 153, 0.2); /* secondary (pink) */
+    --gradient-color-3: rgba(124, 58, 237, 0.2); /* primary (violet) */
+    --gradient-color-4: rgba(236, 72, 153, 0.3); /* secondary (pink) */
+    
+    background:
+      radial-gradient(at 10% 20%, var(--gradient-color-1) 0px, transparent 50%),
+      radial-gradient(at 80% 10%, var(--gradient-color-2) 0px, transparent 50%),
+      radial-gradient(at 20% 90%, var(--gradient-color-3) 0px, transparent 50%),
+      radial-gradient(at 90% 80%, var(--gradient-color-4) 0px, transparent 50%);
+    
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-size: 200% 200%;
+    animation: background-pan 25s linear infinite alternate;
+}
+
+@keyframes background-pan {
+    0% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Glass Effect Styling */
+.glass-effect {
+  background-color: rgba(17, 24, 39, 0.3); /* Dark glass base */
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%); /* Safari compatibility */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
 .step-ladder-item {
   position: relative;
   padding-left: 3rem;
-  padding-bottom: 2rem;
-  border-left: 2px solid #3f3f46; /* Zinc-700 */
+  padding-bottom: 2.5rem;
+  border-left: 2px solid hsl(var(--border));
 }
 
 .step-ladder-item:last-child {
-  border-left: 2px solid transparent;
+  border-left-color: transparent;
   padding-bottom: 0;
 }
 
@@ -91,49 +124,31 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 9999px;
-  background-color: #10b981; /* Emerald-500 */
+  background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--secondary)));
   color: white;
   font-weight: bold;
-  border: 4px solid #18181b; /* Zinc-900 */
+  border: 4px solid hsl(var(--background));
 }
 
-/* New, single animated background that never disappears */
-.hero-gradient-background {
-    --gradient-color-1: rgba(16, 185, 129, 0.3);  /* emerald-500 */
-    --gradient-color-2: rgba(52, 211, 153, 0.2); /* emerald-400 */
-    --gradient-color-3: rgba(16, 185, 129, 0.25); /* emerald-500 */
-    --gradient-color-4: rgba(5, 150, 105, 0.3);  /* emerald-600 */
-    
-    background:
-      radial-gradient(at 10% 20%, var(--gradient-color-1) 0px, transparent 50%),
-      radial-gradient(at 80% 10%, var(--gradient-color-2) 0px, transparent 50%),
-      radial-gradient(at 20% 90%, var(--gradient-color-3) 0px, transparent 50%),
-      radial-gradient(at 90% 80%, var(--gradient-color-4) 0px, transparent 50%);
-    
-    position: fixed; /* This is the fix: changed from absolute to fixed */
-    inset: 0;
-    z-index: 0;
-    background-size: 200% 200%;
-    animation: background-pan 2s linear infinite;
+/* Custom scroll area styling for chat */
+.scroll-area-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground)) transparent;
 }
 
-@keyframes background-pan {
-    0% {
-        background-position: 100% 50%;
-    }
-    50% {
-        background-position: 0% 50%;
-    }
-    100% {
-        background-position: 100% 50%;
-    }
+.scroll-area-thin::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* Glass Effect Styling */
-.glass-effect {
-  background-color: rgba(12, 12, 12, 0.3); /* Dark glass base */
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%); /* Safari compatibility */
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+.scroll-area-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-area-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground));
+  border-radius: 3px;
+}
+
+.scroll-area-thin::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--foreground));
 }
