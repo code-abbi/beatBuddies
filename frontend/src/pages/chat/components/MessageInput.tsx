@@ -11,8 +11,10 @@ const MessageInput = () => {
 	const { selectedUser, sendMessage } = useChatStore();
 
 	const handleSend = () => {
-		if (!selectedUser || !user || !newMessage) return;
-		sendMessage(selectedUser.clerkId, user.id, newMessage.trim());
+		if (!selectedUser || !user) return;
+		const trimmed = newMessage.trim();
+		if (!trimmed) return;
+		sendMessage(selectedUser.clerkId, user.id, trimmed);
 		setNewMessage("");
 	};
 

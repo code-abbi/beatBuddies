@@ -9,12 +9,14 @@ interface ChatStore {
     error: string | null;
     socket: Socket | null;
     isConnected: boolean;
+    currentUserId: string | null;
     onlineUsers: Set<string>;
     userActivities: Map<string, string>;
     messages: Message[];
     selectedUser: User | null;
 
-    fetchUsers: () => Promise<void>;
+    fetchUsers: (currentUserId?: string) => Promise<void>;
+    refreshUsers: () => Promise<void>;
     initSocket: (userId: string) => void;
     disconnectSocket: () => void;
     sendMessage: (receiverId: string, senderId: string, content: string) => void;
@@ -30,6 +32,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     error: null,
     socket: null,
     isConnected: false,
+    currentUserId: null,
     onlineUsers: new Set(),
     userActivities: new Map(),
     messages: [],
@@ -37,16 +40,39 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
     setSelectedUser: (user) => set({ selectedUser: user }),
 
-    fetchUsers: async () => {
+    fetchUsers: async (currentUserId?: string) => {
         set({ isLoading: true, error: null });
         try {
             const response = await axiosInstance.get("/users");
-            set({ users: response.data.filter((u: User) => u.clerkId !== get().socket?.auth.userId) });
+            
+            // Use passed currentUserId or get from store
+            const userId = currentUserId || get().currentUserId;
+            
+            // Show all users except current user, but if only one user exists, show them for self-chat
+            let users: User[] = response.data.filter((u: User) => u.clerkId !== userId);
+            
+            // If there are no other users, allow self-chat for local testing
+            if (users.length === 0 && response.data.length > 0) {
+                users = response.data;
+            }
+            set({ users });
+            
+            // Auto-select first user if none selected
+            if (!get().selectedUser && users.length > 0) {
+                set({ selectedUser: users[0] });
+            }
         } catch (error: any) {
+            console.error("Error fetching users:", error);
             set({ error: error.response?.data?.message || "Failed to fetch users" });
         } finally {
             set({ isLoading: false });
         }
+    },
+
+    refreshUsers: async () => {
+        const currentUserId = get().currentUserId;
+        console.log("Manual refresh users called, currentUserId:", currentUserId);
+        await get().fetchUsers(currentUserId || undefined);
     },
 
     initSocket: (userId) => {
@@ -58,7 +84,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         });
 
         newSocket.on("connect", () => {
-            set({ isConnected: true });
+            set({ isConnected: true, currentUserId: userId });
         });
         
         // Rely on the server to provide the full list of online users
@@ -80,26 +106,34 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
         // Handle receiving a message
         newSocket.on("receive_message", (message: Message) => {
-            // Only add the message if the sender is the currently selected user
-            if (get().selectedUser?.clerkId === message.senderId) {
+            // Add message if it's part of the current conversation
+            const currentUserId = get().currentUserId;
+            const selectedUser = get().selectedUser;
+            if (selectedUser && 
+                ((message.senderId === selectedUser.clerkId && message.receiverId === currentUserId) ||
+                 (message.senderId === currentUserId && message.receiverId === selectedUser.clerkId))) {
                 set((state) => ({ messages: [...state.messages, message] }));
             }
         });
 
         // Handle confirmation of a message you sent
         newSocket.on("message_sent", (message: Message) => {
-            // Only add the message if you're sending it to the currently selected user
-             if (get().selectedUser?.clerkId === message.receiverId) {
+            // Add message if it's part of the current conversation
+            const currentUserId = get().currentUserId;
+            const selectedUser = get().selectedUser;
+            if (selectedUser && 
+                ((message.senderId === currentUserId && message.receiverId === selectedUser.clerkId) ||
+                 (message.senderId === selectedUser.clerkId && message.receiverId === currentUserId))) {
                 set((state) => ({ messages: [...state.messages, message] }));
             }
         });
         
-        set({ socket: newSocket });
+        set({ socket: newSocket, currentUserId: userId });
     },
 
     disconnectSocket: () => {
         get().socket?.disconnect();
-        set({ socket: null, isConnected: false, onlineUsers: new Set(), userActivities: new Map() });
+        set({ socket: null, isConnected: false, currentUserId: null, onlineUsers: new Set(), userActivities: new Map() });
     },
 
     sendMessage: (receiverId, senderId, content) => {
@@ -112,6 +146,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             const response = await axiosInstance.get(`/users/messages/${userId}`);
             set({ messages: response.data });
         } catch (error: any) {
+            console.error("Error fetching messages:", error);
             set({ error: error.response?.data?.message || "Failed to fetch messages" });
         } finally {
             set({ isLoading: false });

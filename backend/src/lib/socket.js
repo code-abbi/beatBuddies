@@ -15,8 +15,10 @@ export const initializeSocket = (server) => {
 
     // Broadcasts the complete, correct state of online users and their activities
     const broadcastFullState = () => {
-        io.emit("users_online", Array.from(userSockets.keys()));
-        io.emit("activities", Array.from(userActivities.entries()));
+        const onlineUsers = Array.from(userSockets.keys());
+        const activities = Array.from(userActivities.entries());
+        io.emit("users_online", onlineUsers);
+        io.emit("activities", activities);
     };
 
     io.on("connection", (socket) => {
@@ -26,7 +28,7 @@ export const initializeSocket = (server) => {
         if (!userId) {
             return socket.disconnect();
         }
-
+        
         // When a user connects, store their socket and set initial activity
         userSockets.set(userId, socket.id);
         userActivities.set(userId, "Idle");
@@ -55,6 +57,7 @@ export const initializeSocket = (server) => {
                 socket.emit("message_sent", message);
 
             } catch (error) {
+                console.error("Error sending message:", error);
                 socket.emit("message_error", error.message);
             }
         });

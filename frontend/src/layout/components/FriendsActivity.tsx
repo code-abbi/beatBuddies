@@ -10,7 +10,33 @@ const FriendsActivity = () => {
 	const { user } = useUser();
 
 	useEffect(() => {
-		if (user) fetchUsers();
+		if (user) {
+			// First ensure user is created in database
+			const ensureUserExists = async () => {
+				try {
+					const response = await fetch('http://localhost:8000/api/auth/create-user', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							id: user.id,
+							firstName: user.firstName,
+							lastName: user.lastName,
+							imageUrl: user.imageUrl,
+						})
+					});
+					const result = await response.json();
+					console.log("FriendsActivity - User creation check result:", result);
+				} catch (error) {
+					console.error("FriendsActivity - Error ensuring user exists:", error);
+				}
+			};
+			
+			ensureUserExists().then(() => {
+				fetchUsers(user.id);
+			});
+		}
 	}, [fetchUsers, user]);
  
 	return (
