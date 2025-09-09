@@ -1,7 +1,6 @@
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { useEffect, useRef,useState } from "react";
+import { useEffect, useRef} from "react";
 import { useChatStore } from "@/stores/useChatStore";
-import { Slider } from "@/components/ui/slider";
 
 const AudioPlayer = () => {
 	const audioRef = useRef<HTMLAudioElement>(null);
