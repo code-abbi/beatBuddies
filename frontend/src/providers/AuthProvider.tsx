@@ -23,8 +23,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 				updateApiToken(token);
 				if (token) {
 					await checkAdminStatus();
-					// init socket
-					if (userId) initSocket(userId);
 				}
 			} catch (error: any) {
 				updateApiToken(null);
@@ -35,10 +33,17 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 		};
 
 		initAuth();
+	}, [getToken, checkAdminStatus]);
 
-		// clean up
-		return () => disconnectSocket();
-	}, [getToken, userId, checkAdminStatus, initSocket, disconnectSocket]);
+	useEffect(() => {
+		if (userId) {
+			initSocket(userId);
+		}
+
+		return () => {
+			disconnectSocket();
+		};
+	}, [userId, initSocket, disconnectSocket]);
 
 	if (loading)
 		return (
