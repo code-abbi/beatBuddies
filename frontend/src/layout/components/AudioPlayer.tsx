@@ -1,49 +1,53 @@
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { useEffect, useRef} from "react";
-import { useChatStore } from "@/stores/useChatStore";
+import { useEffect, useRef } from "react";
 
 const AudioPlayer = () => {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const prevSongRef = useRef<string | null>(null);
 
 	const { currentSong, isPlaying, playNext } = usePlayerStore();
-    const { socket } = useChatStore();
-	
-	// handle play/pause logic
-	useEffect(() => {
-		if (isPlaying) audioRef.current?.play();
-		else audioRef.current?.pause();
-	}, [isPlaying]);
 
-	// handle song ends
+	useEffect(() => {
+		if (isPlaying) {
+			audioRef.current?.play();
+		} else {
+			audioRef.current?.pause();
+		}
+	}, [isPlaying, currentSong]);
+
 	useEffect(() => {
 		const audio = audioRef.current;
+		if (!audio) return;
 
 		const handleEnded = () => {
-			playNext();
+			const { repeat } = usePlayerStore.getState();
+			if (repeat === "one") {
+				audio.currentTime = 0;
+				audio.play();
+			} else {
+				playNext();
+			}
 		};
 
-		audio?.addEventListener("ended", handleEnded);
+		audio.addEventListener("ended", handleEnded);
 
-		return () => audio?.removeEventListener("ended", handleEnded);
+		return () => audio.removeEventListener("ended", handleEnded);
 	}, [playNext]);
 
-	// handle song changes
 	useEffect(() => {
 		if (!audioRef.current || !currentSong) return;
 
 		const audio = audioRef.current;
-
-		// check if this is actually a new song
 		const isSongChange = prevSongRef.current !== currentSong?.audioUrl;
+
 		if (isSongChange) {
-			audio.src = currentSong?.audioUrl;
-			// reset the playback position
+			audio.src = currentSong.audioUrl;
 			audio.currentTime = 0;
+			prevSongRef.current = currentSong.audioUrl;
+		}
 
-			prevSongRef.current = currentSong?.audioUrl;
-
-			if (isPlaying) audio.play();
+		if (isPlaying) {
+			audio.play();
 		}
 	}, [currentSong, isPlaying]);
 

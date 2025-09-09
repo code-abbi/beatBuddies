@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1 } from "lucide-react";
+import { Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Volume1 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
 const formatTime = (seconds: number) => {
 	const minutes = Math.floor(seconds / 60);
@@ -11,7 +13,7 @@ const formatTime = (seconds: number) => {
 };
 
 export const PlaybackControls = () => {
-	const { currentSong, isPlaying, togglePlay, playNext, playPrevious } = usePlayerStore();
+	const { currentSong, isPlaying, togglePlay, playNext, playPrevious, shuffle, repeat, toggleShuffle, cycleRepeat } = usePlayerStore();
 
 	const [volume, setVolume] = useState(75);
 	const [currentTime, setCurrentTime] = useState(0);
@@ -30,16 +32,9 @@ export const PlaybackControls = () => {
 		audio.addEventListener("timeupdate", updateTime);
 		audio.addEventListener("loadedmetadata", updateDuration);
 
-		const handleEnded = () => {
-			usePlayerStore.setState({ isPlaying: false });
-		};
-
-		audio.addEventListener("ended", handleEnded);
-
 		return () => {
 			audio.removeEventListener("timeupdate", updateTime);
 			audio.removeEventListener("loadedmetadata", updateDuration);
-			audio.removeEventListener("ended", handleEnded);
 		};
 	}, [currentSong]);
 
@@ -48,11 +43,16 @@ export const PlaybackControls = () => {
 			audioRef.current.currentTime = value[0];
 		}
 	};
+    
+    const handleFeatureNotImplemented = () => {
+        toast.error("This feature is not implemented yet.");
+    };
+    
+    const RepeatIcon = repeat === 'one' ? Repeat1 : Repeat;
 
 	return (
 		<footer className='h-20 sm:h-24 bg-zinc-900 border-t border-zinc-800 px-4'>
 			<div className='flex justify-between items-center h-full max-w-[1800px] mx-auto'>
-				{/* currently playing song */}
 				<div className='hidden sm:flex items-center gap-4 min-w-[180px] w-[30%]'>
 					{currentSong && (
 						<>
@@ -73,13 +73,13 @@ export const PlaybackControls = () => {
 					)}
 				</div>
 
-				{/* player controls*/}
 				<div className='flex flex-col items-center gap-2 flex-1 max-w-full sm:max-w-[45%]'>
 					<div className='flex items-center gap-4 sm:gap-6'>
 						<Button
 							size='icon'
 							variant='ghost'
-							className='hidden sm:inline-flex hover:text-white text-zinc-400'
+                            onClick={toggleShuffle}
+							className={cn('hidden sm:inline-flex hover:text-white', shuffle ? 'text-emerald-500 hover:text-emerald-400' : 'text-zinc-400')}
 						>
 							<Shuffle className='h-4 w-4' />
 						</Button>
@@ -114,9 +114,10 @@ export const PlaybackControls = () => {
 						<Button
 							size='icon'
 							variant='ghost'
-							className='hidden sm:inline-flex hover:text-white text-zinc-400'
+                            onClick={cycleRepeat}
+							className={cn('hidden sm:inline-flex hover:text-white', repeat !== 'none' ? 'text-emerald-500 hover:text-emerald-400' : 'text-zinc-400')}
 						>
-							<Repeat className='h-4 w-4' />
+							<RepeatIcon className='h-4 w-4' />
 						</Button>
 					</div>
 
@@ -132,15 +133,14 @@ export const PlaybackControls = () => {
 						<div className='text-xs text-zinc-400'>{formatTime(duration)}</div>
 					</div>
 				</div>
-				{/* volume controls */}
 				<div className='hidden sm:flex items-center gap-4 min-w-[180px] w-[30%] justify-end'>
-					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
+					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400' onClick={handleFeatureNotImplemented}>
 						<Mic2 className='h-4 w-4' />
 					</Button>
-					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
+					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400' onClick={handleFeatureNotImplemented}>
 						<ListMusic className='h-4 w-4' />
 					</Button>
-					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
+					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400' onClick={handleFeatureNotImplemented}>
 						<Laptop2 className='h-4 w-4' />
 					</Button>
 
