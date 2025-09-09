@@ -10,9 +10,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { axiosInstance } from "@/lib/axios";
 import { useMusicStore } from "@/stores/useMusicStore";
-import { Plus, Upload } from "lucide-react";
+import { Plus, Upload, Link, FileAudio, Image } from "lucide-react";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -21,18 +22,23 @@ interface NewSong {
 	artist: string;
 	album: string;
 	duration: string;
+	audioUrl?: string;
+	imageUrl?: string;
 }
 
 const AddSongDialog = () => {
 	const { albums } = useMusicStore();
 	const [songDialogOpen, setSongDialogOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
+	const [uploadMethod, setUploadMethod] = useState<"file" | "url">("file");
 
 	const [newSong, setNewSong] = useState<NewSong>({
 		title: "",
 		artist: "",
 		album: "",
 		duration: "0",
+		audioUrl: "",
+		imageUrl: "",
 	});
 
 	const [files, setFiles] = useState<{ audio: File | null; image: File | null }>({
@@ -47,39 +53,58 @@ const AddSongDialog = () => {
 		setIsLoading(true);
 
 		try {
-			if (!files.audio || !files.image) {
-				return toast.error("Please upload both audio and image files");
+			if (uploadMethod === "file") {
+				// File upload method
+				if (!files.audio || !files.image) {
+					return toast.error("Please upload both audio and image files");
+				}
+
+				const formData = new FormData();
+				formData.append("title", newSong.title);
+				formData.append("artist", newSong.artist);
+				formData.append("duration", newSong.duration);
+				if (newSong.album && newSong.album !== "none") {
+					formData.append("albumId", newSong.album);
+				}
+				formData.append("audioFile", files.audio);
+				formData.append("imageFile", files.image);
+
+				await axiosInstance.post("/admin/songs", formData, {
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
+				});
+			} else {
+				// URL upload method
+				if (!newSong.audioUrl || !newSong.imageUrl) {
+					return toast.error("Please provide both audio and image URLs");
+				}
+
+				await axiosInstance.post("/admin/songs/url", {
+					title: newSong.title,
+					artist: newSong.artist,
+					duration: newSong.duration,
+					albumId: newSong.album && newSong.album !== "none" ? newSong.album : null,
+					audioUrl: newSong.audioUrl,
+					imageUrl: newSong.imageUrl,
+				});
 			}
 
-			const formData = new FormData();
-
-			formData.append("title", newSong.title);
-			formData.append("artist", newSong.artist);
-			formData.append("duration", newSong.duration);
-			if (newSong.album && newSong.album !== "none") {
-				formData.append("albumId", newSong.album);
-			}
-
-			formData.append("audioFile", files.audio);
-			formData.append("imageFile", files.image);
-
-			await axiosInstance.post("/admin/songs", formData, {
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-			});
-
+			// Reset form
 			setNewSong({
 				title: "",
 				artist: "",
 				album: "",
 				duration: "0",
+				audioUrl: "",
+				imageUrl: "",
 			});
 
 			setFiles({
 				audio: null,
 				image: null,
 			});
+			
 			toast.success("Song added successfully");
 		} catch (error: any) {
 			toast.error("Failed to add song: " + error.message);
@@ -104,58 +129,98 @@ const AddSongDialog = () => {
 				</DialogHeader>
 
 				<div className='space-y-4 py-4'>
-					<input
-						type='file'
-						accept='audio/*'
-						ref={audioInputRef}
-						hidden
-						onChange={(e) => setFiles((prev) => ({ ...prev, audio: e.target.files![0] }))}
-					/>
+					<Tabs value={uploadMethod} onValueChange={(value) => setUploadMethod(value as "file" | "url")}>
+						<TabsList className="grid w-full grid-cols-2">
+							<TabsTrigger value="file" className="flex items-center gap-2">
+								<Upload className="h-4 w-4" />
+								File Upload
+							</TabsTrigger>
+							<TabsTrigger value="url" className="flex items-center gap-2">
+								<Link className="h-4 w-4" />
+								Web URL
+							</TabsTrigger>
+						</TabsList>
 
-					<input
-						type='file'
-						ref={imageInputRef}
-						className='hidden'
-						accept='image/*'
-						onChange={(e) => setFiles((prev) => ({ ...prev, image: e.target.files![0] }))}
-					/>
+						<TabsContent value="file" className="space-y-4">
+							<input
+								type='file'
+								accept='audio/*'
+								ref={audioInputRef}
+								hidden
+								onChange={(e) => setFiles((prev) => ({ ...prev, audio: e.target.files![0] }))}
+							/>
 
-					{/* image upload area */}
-					<div
-						className='flex items-center justify-center p-6 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer'
-						onClick={() => imageInputRef.current?.click()}
-					>
-						<div className='text-center'>
-							{files.image ? (
-								<div className='space-y-2'>
-									<div className='text-sm text-emerald-500'>Image selected:</div>
-									<div className='text-xs text-zinc-400'>{files.image.name.slice(0, 20)}</div>
+							<input
+								type='file'
+								ref={imageInputRef}
+								className='hidden'
+								accept='image/*'
+								onChange={(e) => setFiles((prev) => ({ ...prev, image: e.target.files![0] }))}
+							/>
+
+							{/* image upload area */}
+							<div
+								className='flex items-center justify-center p-6 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer'
+								onClick={() => imageInputRef.current?.click()}
+							>
+								<div className='text-center'>
+									{files.image ? (
+										<div className='space-y-2'>
+											<div className='text-sm text-emerald-500'>Image selected:</div>
+											<div className='text-xs text-zinc-400'>{files.image.name.slice(0, 20)}</div>
+										</div>
+									) : (
+										<>
+											<div className='p-3 bg-zinc-800 rounded-full inline-block mb-2'>
+												<Image className='h-6 w-6 text-zinc-400' />
+											</div>
+											<div className='text-sm text-zinc-400 mb-2'>Upload artwork</div>
+											<Button variant='outline' size='sm' className='text-xs'>
+												Choose File
+											</Button>
+										</>
+									)}
 								</div>
-							) : (
-								<>
-									<div className='p-3 bg-zinc-800 rounded-full inline-block mb-2'>
-										<Upload className='h-6 w-6 text-zinc-400' />
-									</div>
-									<div className='text-sm text-zinc-400 mb-2'>Upload artwork</div>
-									<Button variant='outline' size='sm' className='text-xs'>
-										Choose File
+							</div>
+
+							{/* Audio upload */}
+							<div className='space-y-2'>
+								<label className='text-sm font-medium'>Audio File</label>
+								<div className='flex items-center gap-2'>
+									<Button variant='outline' onClick={() => audioInputRef.current?.click()} className='w-full'>
+										<FileAudio className="h-4 w-4 mr-2" />
+										{files.audio ? files.audio.name.slice(0, 20) : "Choose Audio File"}
 									</Button>
-								</>
-							)}
-						</div>
-					</div>
+								</div>
+							</div>
+						</TabsContent>
 
-					{/* Audio upload */}
-					<div className='space-y-2'>
-						<label className='text-sm font-medium'>Audio File</label>
-						<div className='flex items-center gap-2'>
-							<Button variant='outline' onClick={() => audioInputRef.current?.click()} className='w-full'>
-								{files.audio ? files.audio.name.slice(0, 20) : "Choose Audio File"}
-							</Button>
-						</div>
-					</div>
+						<TabsContent value="url" className="space-y-4">
+							{/* Audio URL */}
+							<div className='space-y-2'>
+								<label className='text-sm font-medium'>Audio URL</label>
+								<Input
+									value={newSong.audioUrl}
+									onChange={(e) => setNewSong({ ...newSong, audioUrl: e.target.value })}
+									className='bg-zinc-800 border-zinc-700'
+									placeholder='https://example.com/audio.mp3'
+								/>
+							</div>
 
-					{/* other fields */}
+							{/* Image URL */}
+							<div className='space-y-2'>
+								<label className='text-sm font-medium'>Image URL</label>
+								<Input
+									value={newSong.imageUrl}
+									onChange={(e) => setNewSong({ ...newSong, imageUrl: e.target.value })}
+									className='bg-zinc-800 border-zinc-700'
+									placeholder='https://example.com/image.jpg'
+								/>
+							</div>
+						</TabsContent>
+					</Tabs>
+
+					{/* Common fields */}
 					<div className='space-y-2'>
 						<label className='text-sm font-medium'>Title</label>
 						<Input

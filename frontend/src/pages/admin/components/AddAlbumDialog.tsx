@@ -9,20 +9,23 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { axiosInstance } from "@/lib/axios";
-import { Plus, Upload } from "lucide-react";
+import { Plus, Upload, Link, Image } from "lucide-react";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 const AddAlbumDialog = () => {
 	const [albumDialogOpen, setAlbumDialogOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
+	const [uploadMethod, setUploadMethod] = useState<"file" | "url">("file");
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const [newAlbum, setNewAlbum] = useState({
 		title: "",
 		artist: "",
 		releaseYear: new Date().getFullYear(),
+		imageUrl: "",
 	});
 
 	const [imageFile, setImageFile] = useState<File | null>(null);
@@ -38,26 +41,43 @@ const AddAlbumDialog = () => {
 		setIsLoading(true);
 
 		try {
-			if (!imageFile) {
-				return toast.error("Please upload an image");
+			if (uploadMethod === "file") {
+				// File upload method
+				if (!imageFile) {
+					return toast.error("Please upload an image");
+				}
+
+				const formData = new FormData();
+				formData.append("title", newAlbum.title);
+				formData.append("artist", newAlbum.artist);
+				formData.append("releaseYear", newAlbum.releaseYear.toString());
+				formData.append("imageFile", imageFile);
+
+				await axiosInstance.post("/admin/albums", formData, {
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
+				});
+			} else {
+				// URL upload method
+				if (!newAlbum.imageUrl) {
+					return toast.error("Please provide an image URL");
+				}
+
+				await axiosInstance.post("/admin/albums/url", {
+					title: newAlbum.title,
+					artist: newAlbum.artist,
+					releaseYear: newAlbum.releaseYear,
+					imageUrl: newAlbum.imageUrl,
+				});
 			}
 
-			const formData = new FormData();
-			formData.append("title", newAlbum.title);
-			formData.append("artist", newAlbum.artist);
-			formData.append("releaseYear", newAlbum.releaseYear.toString());
-			formData.append("imageFile", imageFile);
-
-			await axiosInstance.post("/admin/albums", formData, {
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-			});
-
+			// Reset form
 			setNewAlbum({
 				title: "",
 				artist: "",
 				releaseYear: new Date().getFullYear(),
+				imageUrl: "",
 			});
 			setImageFile(null);
 			setAlbumDialogOpen(false);
@@ -83,29 +103,58 @@ const AddAlbumDialog = () => {
 					<DialogDescription>Add a new album to your collection</DialogDescription>
 				</DialogHeader>
 				<div className='space-y-4 py-4'>
-					<input
-						type='file'
-						ref={fileInputRef}
-						onChange={handleImageSelect}
-						accept='image/*'
-						className='hidden'
-					/>
-					<div
-						className='flex items-center justify-center p-6 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer'
-						onClick={() => fileInputRef.current?.click()}
-					>
-						<div className='text-center'>
-							<div className='p-3 bg-zinc-800 rounded-full inline-block mb-2'>
-								<Upload className='h-6 w-6 text-zinc-400' />
+					<Tabs value={uploadMethod} onValueChange={(value) => setUploadMethod(value as "file" | "url")}>
+						<TabsList className="grid w-full grid-cols-2">
+							<TabsTrigger value="file" className="flex items-center gap-2">
+								<Upload className="h-4 w-4" />
+								File Upload
+							</TabsTrigger>
+							<TabsTrigger value="url" className="flex items-center gap-2">
+								<Link className="h-4 w-4" />
+								Web URL
+							</TabsTrigger>
+						</TabsList>
+
+						<TabsContent value="file" className="space-y-4">
+							<input
+								type='file'
+								ref={fileInputRef}
+								onChange={handleImageSelect}
+								accept='image/*'
+								className='hidden'
+							/>
+							<div
+								className='flex items-center justify-center p-6 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer'
+								onClick={() => fileInputRef.current?.click()}
+							>
+								<div className='text-center'>
+									<div className='p-3 bg-zinc-800 rounded-full inline-block mb-2'>
+										<Image className='h-6 w-6 text-zinc-400' />
+									</div>
+									<div className='text-sm text-zinc-400 mb-2'>
+										{imageFile ? imageFile.name : "Upload album artwork"}
+									</div>
+									<Button variant='outline' size='sm' className='text-xs'>
+										Choose File
+									</Button>
+								</div>
 							</div>
-							<div className='text-sm text-zinc-400 mb-2'>
-								{imageFile ? imageFile.name : "Upload album artwork"}
+						</TabsContent>
+
+						<TabsContent value="url" className="space-y-4">
+							<div className='space-y-2'>
+								<label className='text-sm font-medium'>Image URL</label>
+								<Input
+									value={newAlbum.imageUrl}
+									onChange={(e) => setNewAlbum({ ...newAlbum, imageUrl: e.target.value })}
+									className='bg-zinc-800 border-zinc-700'
+									placeholder='https://example.com/album-cover.jpg'
+								/>
 							</div>
-							<Button variant='outline' size='sm' className='text-xs'>
-								Choose File
-							</Button>
-						</div>
-					</div>
+						</TabsContent>
+					</Tabs>
+
+					{/* Common fields */}
 					<div className='space-y-2'>
 						<label className='text-sm font-medium'>Album Title</label>
 						<Input

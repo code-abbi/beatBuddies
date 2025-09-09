@@ -52,6 +52,46 @@ export const createSong = async (req, res, next) => {
 	}
 };
 
+export const createSongFromUrl = async (req, res, next) => {
+	try {
+		const { title, artist, albumId, duration, audioUrl, imageUrl } = req.body;
+
+		if (!title || !artist || !audioUrl || !imageUrl) {
+			return res.status(400).json({ message: "Please provide all required fields" });
+		}
+
+		// Validate URLs
+		try {
+			new URL(audioUrl);
+			new URL(imageUrl);
+		} catch (urlError) {
+			return res.status(400).json({ message: "Please provide valid URLs" });
+		}
+
+		const song = new Song({
+			title,
+			artist,
+			audioUrl,
+			imageUrl,
+			duration: duration || "0",
+			albumId: albumId || null,
+		});
+
+		await song.save();
+
+		// if song belongs to an album, update the album's songs array
+		if (albumId) {
+			await Album.findByIdAndUpdate(albumId, {
+				$push: { songs: song._id },
+			});
+		}
+		res.status(201).json(song);
+	} catch (error) {
+		console.log("Error in createSongFromUrl", error);
+		next(error);
+	}
+};
+
 export const deleteSong = async (req, res, next) => {
 	try {
 		const { id } = req.params;
@@ -93,6 +133,37 @@ export const createAlbum = async (req, res, next) => {
 		res.status(201).json(album);
 	} catch (error) {
 		console.log("Error in createAlbum", error);
+		next(error);
+	}
+};
+
+export const createAlbumFromUrl = async (req, res, next) => {
+	try {
+		const { title, artist, releaseYear, imageUrl } = req.body;
+
+		if (!title || !artist || !imageUrl) {
+			return res.status(400).json({ message: "Please provide all required fields" });
+		}
+
+		// Validate URL
+		try {
+			new URL(imageUrl);
+		} catch (urlError) {
+			return res.status(400).json({ message: "Please provide a valid image URL" });
+		}
+
+		const album = new Album({
+			title,
+			artist,
+			imageUrl,
+			releaseYear: releaseYear || new Date().getFullYear(),
+		});
+
+		await album.save();
+
+		res.status(201).json(album);
+	} catch (error) {
+		console.log("Error in createAlbumFromUrl", error);
 		next(error);
 	}
 };
