@@ -31,9 +31,13 @@ const LeftSidebar = () => {
 							)
 						}
 					>
-						{({ isActive }) => isActive && <div className="absolute left-0 top-1/4 h-1/2 w-1 bg-primary rounded-r-full" />}
-						<Home className='size-5' />
-						<span className='hidden md:inline'>Home</span>
+						{({ isActive }) => (
+                            <>
+                                {isActive && <div className="absolute left-0 top-1/4 h-1/2 w-1 bg-primary rounded-r-full" />}
+                                <Home className='size-5' />
+                                <span className='hidden md:inline'>Home</span>
+                            </>
+                        )}
 					</NavLink>
 					<SignedIn>
 						<NavLink
@@ -47,9 +51,13 @@ const LeftSidebar = () => {
 								)
 							}
 						>
-							{({ isActive }) => isActive && <div className="absolute left-0 top-1/4 h-1/2 w-1 bg-primary rounded-r-full" />}
-							<MessageCircle className='size-5' />
-							<span className='hidden md:inline'>Messages</span>
+							{({ isActive }) => (
+                                <>
+                                    {isActive && <div className="absolute left-0 top-1/4 h-1/2 w-1 bg-primary rounded-r-full" />}
+                                    <MessageCircle className='size-5' />
+                                    <span className='hidden md:inline'>Messages</span>
+                                </>
+                            )}
 						</NavLink>
 					</SignedIn>
 				</nav>
