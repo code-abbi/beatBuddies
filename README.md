@@ -1,49 +1,71 @@
 <h1 align="center">Realtime Music testing Application ✨</h1>
 
 # BeatBuddies 🎧
-BeatBuddy 🎧
 The ultimate feedback loop for your next hit. BeatBuddy is a full-stack, real-time music sharing application for artists to get instant feedback on their tracks from a trusted circle.
-
+#
 ✨ Core Features
-🎵 Secure Uploads: Artists can upload tracks and cover art, hosted securely on Cloudinary.
+-🎵 Dynamic Music Player: Listen to music, control playback (play, pause, next, previous), and update the volume with a slider.
 
-💬 Real-Time Chat: Get instant, one-on-one feedback on your music with a live chat system built with Socket.IO.
+-🎧 Admin Dashboard: A dedicated panel for administrators to create and manage albums and songs.
 
-👀 Live Friends Activity: See what your friends are listening to in real-time.
+-💬 Real-time Chat: An integrated chat allows for instant collaboration and feedback on tracks.
 
-🛡️ Admin Dashboard: A dedicated panel for administrators to manage all content and view application stats.
+-👨🏼‍💼 Live User Status: See who is online/offline with real-time presence indicators.
 
-🎨 Modern UI: A sleek, dark-themed interface built with React, Vite, Tailwind CSS, and Shadcn/UI.
+-👀 Friends Activity: See what other users are listening to at any given moment.
 
-🛠️ Tech Stack
-Frontend: React, TypeScript, Vite, Tailwind CSS, Zustand
+-📊 Platform Analytics: The admin dashboard includes aggregate data for total songs, albums, artists, and users.
 
-Backend: Node.js, Express.js, MongoDB, Socket.IO
-
-Services: Clerk (Authentication), Cloudinary (Media Hosting)
-
-
+#
 🚀 Getting Started
-Clone the repository:
+
+-Clone the repository:
+```bash
 git clone <https://github.com/code-abbi/beatBuddies.git>
 cd beatBuddies
+```
 
-Install all dependencies:
-(This installs for both frontend and backend from the root)
+-Install dependencies:
+Run this command from the root directory to install dependencies for both the frontend and backend.
+
+```bash
 npm install
+```
+-Setup Backend .env
+Navigate to the backend folder, create a .env file, and add the following variables:
+```bash
+PORT=8000
+MONGODB_URI=...
+ADMIN_EMAIL=...
+NODE_ENV=development
 
-Set up Environment Variables:
-In both the frontend and backend folders, copy the .env.sample file to a new file named .env.
-Fill in your secret keys (MongoDB URI, Clerk, Cloudinary, etc.).
+# Cloudinary Keys
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+CLOUDINARY_CLOUD_NAME=...
 
-Run the Development Servers:
-You will need two separate terminals.
+# Clerk Keys
+CLERK_SECRET_KEY=...
+```
+-Setup Frontend .env
+```bash
+VITE_CLERK_PUBLISHABLE_KEY=...
+VITE_API_URL=http://localhost:8000/api
+```
+
+- Run the Application
+You will need two separate terminals open.
 
 Terminal 1 (Backend):
-cd backend && npm run dev
-
+```bash
+cd backend
+npm run dev
+```
 Terminal 2 (Frontend):
-cd frontend && npm run dev
-
-☁️ Deployment
+```bash
+cd frontend
+npm run dev
+```
+#
+- ☁️ Deployment
 This monorepo is configured for an easy single-server deployment. On a platform like Render, you can deploy the entire project as one Web Service, using the build and start commands from the root package.json file
