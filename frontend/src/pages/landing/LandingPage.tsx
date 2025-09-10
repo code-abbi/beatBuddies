@@ -64,7 +64,7 @@ const LandingPage = () => {
                             </>
                         ) : (
                             <Link to='/sign-in'>
-                                <Button className='bg-foreground text-background font-semibold hover:bg-foreground/80'>
+                                <Button className='bg-gradient-to-r from-primary to-secondary text-primary-foreground font-bold text-lg px-10 py-7 shadow-lg transform hover:scale-105 transition-transform duration-200 rounded-full'>
                                     Sign In
                                 </Button>
                             </Link>
