@@ -30,9 +30,10 @@ const httpServer = createServer(app);
 initializeSocket(httpServer);
 
 // Apply CORS middleware for all HTTP requests
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 app.use(
 	cors({
-		origin: "http://localhost:3000",
+		origin: frontendUrl,
 		credentials: true,
 	})
 );

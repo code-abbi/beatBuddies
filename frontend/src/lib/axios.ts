@@ -1,7 +1,11 @@
 import axios from "axios";
 
+const isProduction = import.meta.env.PROD;
+
 export const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api",
+    // In production, this will make the URL relative (e.g., /api/songs)
+    // In development, it will use your local .env variable
+    baseURL: isProduction ? "/api" : (import.meta.env.VITE_API_URL || "http://localhost:8000/api"),
     withCredentials: true,
 });
 
