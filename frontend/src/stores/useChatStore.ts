@@ -24,7 +24,10 @@ interface ChatStore {
     setSelectedUser: (user: User | null) => void;
 }
 
-const baseURL = "http://localhost:8000";
+const isProduction = import.meta.env.PROD;
+// In production, the socket connects to the same server that serves the site.
+// In development, it connects to your local backend server.
+const baseURL = isProduction ? "" : "http://localhost:8000";
 
 export const useChatStore = create<ChatStore>((set, get) => ({
     users: [],
@@ -44,20 +47,15 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         set({ isLoading: true, error: null });
         try {
             const response = await axiosInstance.get("/users");
-            
-            // Use passed currentUserId or get from store
             const userId = currentUserId || get().currentUserId;
             
-            // Show all users except current user, but if only one user exists, show them for self-chat
             let users: User[] = response.data.filter((u: User) => u.clerkId !== userId);
             
-            // If there are no other users, allow self-chat for local testing
             if (users.length === 0 && response.data.length > 0) {
                 users = response.data;
             }
             set({ users });
             
-            // Auto-select first user if none selected
             if (!get().selectedUser && users.length > 0) {
                 set({ selectedUser: users[0] });
             }
@@ -71,7 +69,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
     refreshUsers: async () => {
         const currentUserId = get().currentUserId;
-        console.log("Manual refresh users called, currentUserId:", currentUserId);
         await get().fetchUsers(currentUserId || undefined);
     },
 
@@ -79,7 +76,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         if (get().socket || !userId) return;
 
         const newSocket = io(baseURL, {
-            auth: { userId }, // Pass userId for authentication
+            auth: { userId },
             withCredentials: true,
         });
 
@@ -87,26 +84,21 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set({ isConnected: true, currentUserId: userId });
         });
         
-        // Rely on the server to provide the full list of online users
         newSocket.on("users_online", (usersOnline: string[]) => {
             set({ onlineUsers: new Set(usersOnline) });
         });
 
-        // Rely on the server for the full list of activities
         newSocket.on("activities", (activities: [string, string][]) => {
             set({ userActivities: new Map(activities) });
         });
         
-        // Handle single activity updates
         newSocket.on("activity_updated", ({ userId: id, activity }) => {
             set((state) => ({
                 userActivities: new Map(state.userActivities).set(id, activity),
             }));
         });
 
-        // Handle receiving a message
         newSocket.on("receive_message", (message: Message) => {
-            // Add message if it's part of the current conversation
             const currentUserId = get().currentUserId;
             const selectedUser = get().selectedUser;
             if (selectedUser && 
@@ -116,9 +108,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             }
         });
 
-        // Handle confirmation of a message you sent
         newSocket.on("message_sent", (message: Message) => {
-            // Add message if it's part of the current conversation
             const currentUserId = get().currentUserId;
             const selectedUser = get().selectedUser;
             if (selectedUser && 
